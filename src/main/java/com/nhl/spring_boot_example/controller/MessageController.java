@@ -3,6 +3,10 @@ package com.nhl.spring_boot_example.controller;
 import com.nhl.spring_boot_example.model.Message;
 import com.nhl.spring_boot_example.repository.MessageRepository;
 import org.springframework.http.HttpStatus;
+import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.handler.annotation.Payload;
+import org.springframework.messaging.handler.annotation.SendTo;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -15,9 +19,12 @@ import java.util.List;
 @RequestMapping("/messages")
 public class MessageController {
 
+    private SimpMessagingTemplate template;
+
     private final MessageRepository messageReposito;
 
-    public MessageController(MessageRepository messageReposito) {
+    public MessageController(SimpMessagingTemplate template, MessageRepository messageReposito) {
+        this.template = template;
         this.messageReposito = messageReposito;
     }
 
@@ -47,6 +54,8 @@ public class MessageController {
      * Je kan ook HTTP POST gebruiken, dan kan je data opsturen.
      * Met de annotatie @ResponseStatus geven we aan dat Spring een andere HTTP status code
      * moet teruggeven dan de standaard 200 OK. Nu gaat die 201 CREATED teruggeven.
+     *
+     * Nu gaat een binnengekomen bericht ook naar de websocket topic!
      * @param message
      */
     @PostMapping
@@ -54,6 +63,20 @@ public class MessageController {
     public void createMessage(@RequestBody Message message) {
         System.out.println("Message received:");
         System.out.println(message);
+        template.convertAndSend("/topic/messages", message);
+    }
+
+    /**
+     * Deze methode luistert op de URL ws://localhost:8080/messages/broadcast (de @RequestMapping op regel 19 wordt
+     * hier niet aan toegevoegd), oftewel, luister naar websocket berichten.
+     * @param message
+     * @return De return value wordt dankzij @SendTo automatisch naar een bepaald topic gestuurd (in dit geval "topic/messages")
+     * Alles wat luistert op deze topic wordt automatisch op de hoogte gesteld.
+     */
+    @MessageMapping("/messages/broadcast")
+    @SendTo("/topic/messages")
+    public Message broadcastMessage(@RequestBody Message message) {
+        return message;
     }
 
 }
