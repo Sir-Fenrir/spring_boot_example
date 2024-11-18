@@ -19,6 +19,7 @@ public class HelloWorldController {
     /**
      * Via dependency injection wordt de property 'greeting.default' uit de application.properties
      * gehaald en hier meegegeven aan de constructor. Spring roept deze constructor voor je aan.
+     *
      * @param greeting
      */
     public HelloWorldController(@Value("${greeting.default}") String greeting) {

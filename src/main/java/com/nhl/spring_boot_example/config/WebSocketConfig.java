@@ -17,6 +17,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     /**
      * In deze methode registreren we een hele simpele message broker (waar een websocket mee werkt), met de naam '/topic'.
+     *
      * @param registry
      */
     @Override
@@ -26,6 +27,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     /**
      * Hier registreren we het endpoint wat aangeroepen moet worden om een websocket connectie te starten.
+     *
      * @param registry
      */
     @Override
