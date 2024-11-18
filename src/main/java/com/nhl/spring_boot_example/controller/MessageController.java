@@ -33,21 +33,23 @@ public class MessageController {
      * @return
      */
     @GetMapping("/{id}")
-    public Message getMessage(@PathVariable("id") int id) {
-        return messageReposito.getMessage(id);
+    public Message getMessage(@PathVariable("id") long id) {
+        return messageReposito.findById(id).orElse(new Message("Error", "Message not found"));
     }
 
     /**
      * Deze methode wordt aangeroepen als de url /messages wordt aangeroepen, via HTTP GET.
+     * <p>
+     * De query wordt doorgegeven aan de repository om mee te gaan zoeken.
      *
      * @param query Deze waarde is standaard leeg (zie defaultValue), maar als er een query parameter is,
      *              wordt die meegegeven. Bijvoorbeeld: /messages?query=hello, dan geeft Spring de String 'hello'
      *              mee aan het argument 'query'.
-     * @return De implementatie is leeg, het is een voorbeeld.
+     * @return De gevonden berichten.
      */
     @GetMapping
     public List<Message> searchMessages(@RequestParam(value = "query", defaultValue = "") String query) {
-        return null;
+        return messageReposito.findByTitleContaining(query);
     }
 
     /**
@@ -56,14 +58,15 @@ public class MessageController {
      * moet teruggeven dan de standaard 200 OK. Nu gaat die 201 CREATED teruggeven.
      * <p>
      * Nu gaat een binnengekomen bericht ook naar de websocket topic!
+     * <p>
+     * Een opgestuurd bericht wordt opgeslagen in de database.
      *
      * @param message
      */
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public void createMessage(@RequestBody Message message) {
-        System.out.println("Message received:");
-        System.out.println(message);
+        messageReposito.save(message);
         template.convertAndSend("/topic/messages", message);
     }
 

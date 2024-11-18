@@ -1,9 +1,33 @@
 package com.nhl.spring_boot_example.model;
 
+import jakarta.persistence.*;
+
+/**
+ * We hebben hier nu een entity van gemaakt met de annotatie @Entity.
+ * Dit zegt tegen ons ORM (Hibernate, automatisch geïmporteerd en geconfigureerd door Spring Boot),
+ * dat er een tabel is in de database die hier bij hoort.
+ * De naam van die tabel wordt afgeleid van de naam van de klasse. Als die afwijkt, moet je de tabelnaam
+ * meegeven via @Table.
+ */
+@Entity
+@Table(name = "messages")
 public class Message {
 
+    // Een tabel heeft een primary key. Die mappen we met de annotatie @Id.
+    // We moeten Hibernate ook vertellen hoe de primary key wordt bepaald.
+    // In ons scenario wordt die automatisch gegenereerd door de database.
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    // Als een field naam overeenkomt met de naam van een kolom, hoef je niets te doen.
+    // Deze zal automatisch gemapped worden.
+    // Mocht de naam anders zijn, kan je dat ook aan @Column toevoegen.
+    // We geven nu aan dat een veld niet null mag zijn. Deze regel staat ook in de database.
+    @Column(nullable = false)
     private String title;
 
+    @Column(nullable = false)
     private String content;
 
     /**
@@ -16,6 +40,14 @@ public class Message {
     public Message(String title, String content) {
         this.title = title;
         this.content = content;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Long getId() {
+        return id;
     }
 
     public String getTitle() {
