@@ -30,6 +30,13 @@ public class Message {
     @Column(nullable = false)
     private String content;
 
+    // We definiëren hier een relatie met de Author klasse.
+    // De @ManyToOne zegt dat er Many Messages (deze klasse) zijn voor One Author (de andere klasse).
+    // De name is de naam van de kolom met de foreign key.
+    @ManyToOne
+    @JoinColumn(name = "author_id")
+    private Author author;
+
     /**
      * Deze lege constructor is nodig! De JSON library die we gebruiken (Jackson) heeft dit nodig om een
      * instantie van de klasse te maken.
@@ -42,12 +49,20 @@ public class Message {
         this.content = content;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public Author getAuthor() {
+        return author;
+    }
+
+    public void setAuthor(Author author) {
+        this.author = author;
     }
 
     public Long getId() {
         return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public String getTitle() {

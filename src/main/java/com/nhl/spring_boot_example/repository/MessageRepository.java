@@ -21,6 +21,7 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
      * Deze methode hebben we zelf gedefiniëerd. Dus wat gaat Spring dan doen?
      * Die gaat de naam van de methode lezen en op basis daarvan een bijpassende query genereren!
      * En de parameters worden daar dan ingeplugd.
+     *
      * @param title De titel waar op gezocht moet worden.
      * @return Alle gevonden berichten
      */
@@ -32,6 +33,7 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
      * Als je de query leest valt het je waarschijnlijk op dat het geen gewone SQL is. Dat klopt.
      * Dit is JPQL, de Java Persistence Query Language. Die verwijst naar de entiteiten,
      * zoals Message, i.p.v. de tabellen.
+     *
      * @param title De titel waar op gezocht moet worden.
      * @return Alle gevonden berichten
      */
