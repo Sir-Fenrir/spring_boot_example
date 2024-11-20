@@ -44,7 +44,7 @@ public class Message {
     public Message() {
     }
 
-    public Message(String title, String content) {
+    public Message(String title, String content, Author author) {
         this.title = title;
         this.content = content;
     }

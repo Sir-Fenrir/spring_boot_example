@@ -1,6 +1,6 @@
 package com.nhl.spring_boot_example.tasks;
 
-import com.nhl.spring_boot_example.model.Message;
+import com.nhl.spring_boot_example.dto.MessageDTO;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -34,7 +34,7 @@ public class TimerTask {
      */
     @Scheduled(fixedRate = 5, timeUnit = TimeUnit.SECONDS)
     public void timeSender() {
-        Message message = new Message("Current Time", LocalDateTime.now().format(formatter));
+        MessageDTO message = new MessageDTO("Current Time", LocalDateTime.now().format(formatter), 0L);
         template.convertAndSend("/topic/messages", message);
     }
 

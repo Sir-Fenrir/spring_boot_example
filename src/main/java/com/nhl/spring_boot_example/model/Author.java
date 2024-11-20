@@ -2,6 +2,8 @@ package com.nhl.spring_boot_example.model;
 
 import jakarta.persistence.*;
 
+import java.util.List;
+
 /**
  * Alles in deze klasse lijkt op wat je hebt gezien bij de Message klasse.
  */
@@ -15,6 +17,9 @@ public class Author {
 
     @Column(nullable = false)
     private String name;
+
+    @OneToMany(mappedBy = "author")
+    private List<Message> messages;
 
     public Long getId() {
         return id;
@@ -30,5 +35,13 @@ public class Author {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public List<Message> getMessages() {
+        return messages;
+    }
+
+    public void setMessages(List<Message> messages) {
+        this.messages = messages;
     }
 }
