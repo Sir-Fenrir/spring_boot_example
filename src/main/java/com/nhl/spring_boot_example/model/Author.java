@@ -2,6 +2,7 @@ package com.nhl.spring_boot_example.model;
 
 import jakarta.persistence.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -18,8 +19,19 @@ public class Author {
     @Column(nullable = false)
     private String name;
 
+    // Nu maken we de relatie bidirectioneel! Oftewel, we kunnen vanuit de Message bij de Author komen en vice versa!
+    // De @OneToMany zegt eigenlijk 'One' Author met 'Many' Messages.
+    // De 'mappedBy' vertelt wat over de andere kant van de relatie. De string 'author' verwijst naar het veld
+    // in Message.
     @OneToMany(mappedBy = "author")
-    private List<Message> messages;
+    private List<Message> messages = new ArrayList<>();
+
+    public Author(String name) {
+        this.name = name;
+    }
+
+    public Author() {
+    }
 
     public Long getId() {
         return id;

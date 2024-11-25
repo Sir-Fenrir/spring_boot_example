@@ -1,5 +1,7 @@
 package com.nhl.spring_boot_example.controller;
 
+import com.nhl.spring_boot_example.dto.MessageDTO;
+import com.nhl.spring_boot_example.mapper.MessageMapper;
 import com.nhl.spring_boot_example.model.Message;
 import com.nhl.spring_boot_example.repository.MessageRepository;
 import org.springframework.http.HttpStatus;
@@ -20,10 +22,12 @@ public class MessageController {
 
     private final MessageRepository messageReposito;
     private final SimpMessagingTemplate template;
+    private final MessageMapper mapper;
 
-    public MessageController(SimpMessagingTemplate template, MessageRepository messageReposito) {
+    public MessageController(SimpMessagingTemplate template, MessageRepository messageReposito, MessageMapper mapper) {
         this.template = template;
         this.messageReposito = messageReposito;
+        this.mapper = mapper;
     }
 
     /**
@@ -33,8 +37,9 @@ public class MessageController {
      * @return
      */
     @GetMapping("/{id}")
-    public Message getMessage(@PathVariable("id") long id) {
-        return messageReposito.findById(id).orElse(new Message("Error", "Message not found"));
+    public MessageDTO getMessage(@PathVariable("id") long id) {
+        Message message = messageReposito.findById(id).orElseThrow();
+        return mapper.toDTO(message);
     }
 
     /**
@@ -48,8 +53,8 @@ public class MessageController {
      * @return De gevonden berichten.
      */
     @GetMapping
-    public List<Message> searchMessages(@RequestParam(value = "query", defaultValue = "") String query) {
-        return messageReposito.findByTitleContaining(query);
+    public List<MessageDTO> searchMessages(@RequestParam(value = "query", defaultValue = "") String query) {
+        return mapper.toDTO(messageReposito.findByTitleContaining(query));
     }
 
     /**
@@ -65,8 +70,8 @@ public class MessageController {
      */
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public void createMessage(@RequestBody Message message) {
-        messageReposito.save(message);
+    public void createMessage(@RequestBody MessageDTO message) {
+        messageReposito.save(mapper.toEntity(message));
         template.convertAndSend("/topic/messages", message);
     }
 
@@ -80,7 +85,7 @@ public class MessageController {
      */
     @MessageMapping("/messages/broadcast")
     @SendTo("/topic/messages")
-    public Message broadcastMessage(@RequestBody Message message) {
+    public MessageDTO broadcastMessage(@RequestBody MessageDTO message) {
         return message;
     }
 

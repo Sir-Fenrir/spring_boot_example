@@ -1,6 +1,7 @@
 package com.nhl.spring_boot_example.controller;
 
-import com.nhl.spring_boot_example.model.Author;
+import com.nhl.spring_boot_example.dto.AuthorDTO;
+import com.nhl.spring_boot_example.mapper.AuthorMapper;
 import com.nhl.spring_boot_example.repository.AuthorRepository;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,14 +16,17 @@ public class AuthorController {
 
     private final AuthorRepository authorRepository;
 
+    private final AuthorMapper authorMapper;
+
     /**
      * Spring doet dus de dependency injection voor ons. Die roept deze constructor aan
      * en geeft de AuthorRepository instantie er aan mee.
      *
      * @param authorRepository
      */
-    public AuthorController(AuthorRepository authorRepository) {
+    public AuthorController(AuthorRepository authorRepository, AuthorMapper authorMapper) {
         this.authorRepository = authorRepository;
+        this.authorMapper = authorMapper;
     }
 
     /**
@@ -32,11 +36,11 @@ public class AuthorController {
      * @return Alle auteurs, of alle auteurs met de opgegeven naam.
      */
     @GetMapping
-    public List<Author> findAll(@RequestParam(defaultValue = "") String name) {
+    public List<AuthorDTO> findAll(@RequestParam(defaultValue = "") String name) {
         if ("".equals(name)) {
-            return authorRepository.findAll();
+            return authorMapper.toDTO(authorRepository.findAll());
         }
 
-        return authorRepository.findByName(name);
+        return authorMapper.toDTO(authorRepository.findByName(name));
     }
 }

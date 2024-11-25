@@ -47,6 +47,7 @@ public class Message {
     public Message(String title, String content, Author author) {
         this.title = title;
         this.content = content;
+        this.author = author;
     }
 
     public Author getAuthor() {

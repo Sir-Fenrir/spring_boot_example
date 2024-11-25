@@ -34,7 +34,7 @@ public class TimerTask {
      */
     @Scheduled(fixedRate = 5, timeUnit = TimeUnit.SECONDS)
     public void timeSender() {
-        MessageDTO message = new MessageDTO("Current Time", LocalDateTime.now().format(formatter), 0L);
+        MessageDTO message = new MessageDTO(-1L, "Current Time", LocalDateTime.now().format(formatter), -1L);
         template.convertAndSend("/topic/messages", message);
     }
 
