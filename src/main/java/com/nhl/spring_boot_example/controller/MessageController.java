@@ -70,9 +70,9 @@ public class MessageController {
      */
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Message createMessage(@RequestBody MessageDTO message) {
+    public MessageDTO createMessage(@RequestBody MessageDTO message) {
         template.convertAndSend("/topic/messages", message);
-        return messageService.saveMessage(mapper.toEntity(message));
+        return mapper.toDTO(messageService.saveMessage(mapper.toEntity(message)));
     }
 
     /**

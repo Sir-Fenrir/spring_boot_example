@@ -6,6 +6,16 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+/**
+ * Met @Service zeggen we tegen Spring Boot dat er ook een instantie gemaakt moet worden van de MessageService.
+ * Spring instantiëert dit dan en stopt het resulterende object in de ApplicationContext.
+ * <p>
+ * Een Service klasse is bedoeld voor business logica. Oftewel, bijna alles wat niet gaat over communiceren met
+ * de client (dat doen de RestControllers immers) of de databronnen (daarvoor hebben we Repositories).
+ * <p>
+ * Nu is deze klasse nog vrij leeg, dus is het voornamelijk een doorgeefluik.
+ * Echter, in de praktijk wordt een applicatie natuurlijk altijd complexer dan deze nu is.
+ */
 @Service
 public class MessageService {
 
