@@ -3,18 +3,26 @@ package com.nhl.spring_boot_example.controller;
 import com.nhl.spring_boot_example.mapper.MessageMapper;
 import com.nhl.spring_boot_example.model.Author;
 import com.nhl.spring_boot_example.model.Message;
+import com.nhl.spring_boot_example.repository.AuthorRepository;
 import com.nhl.spring_boot_example.service.MessageService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
+import org.springframework.http.MediaType;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+
+import java.util.List;
+import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -28,6 +36,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * Technisch gezien zijn het dus integratie testen. Al noemen sommigen het ook wel 'slice testen'.
  */
 @WebMvcTest(controllers = MessageController.class)
+@Import(MessageMapper.class) // De MessageMapper mocken is niet echt nodig, dus vragen we op deze manier aan Spring om die wel te instantiëren.
 class MessageControllerTest {
 
     // Eerst zagen we alleen Dependency Injection via de constructor. Het kan echter ook op velden.
@@ -48,24 +57,33 @@ class MessageControllerTest {
     @MockBean
     private SimpMessagingTemplate simpleMessagingTemplate;
 
-    // Dit is ook nog een dependency van de MessageController.
-    // Alleen is het hier iets complexer. Op zich is het niet erg als deze niet gemockt wordt,
-    // ware het niet dat de MessageMapper weer afhankelijk is van de AuthorRepository.
-    // Voor het gemak mocken we die toch wel, maar gaan we straks de mock iets anders instellen.
+    // Dit is geen dependency van de MessageController, maar wél van de MessageMapper.
+    // De AuthorRepository werkt met de database, dus deze mocken we ook.
     @MockBean
-    private MessageMapper messageMapper;
+    private AuthorRepository authorRepository;
 
     // Voor elke test wordt deze methode uitgevoerd.
     @BeforeEach
-    void setup() {
-        // Oké, hier stellen we nu in dat als de toDTO methode wordt aangeroepen
-        // (Die niet de AuthorRepository gebruikt)
-        // dat de echte implementatie wordt aangeroepen i.p.v de mock implementatie.
-        when(messageMapper.toDTO(any(Message.class))).thenCallRealMethod();
+    public void setup() {
+        // We maken even een nep-autor
+        Author author = new Author();
+        author.setName("Jan");
+        // Nu stellen we in dat we een lijst van messages teruggeven als messageService.getMessages() wordt aaangeroepen.
+        when(messageService.getMessages())
+                .thenReturn(
+                        List.of(
+                                new Message("First", "Content", author),
+                                new Message("Second", "Content", author),
+                                new Message("Fourth", "Content", author)
+                        )
+                );
+
+        // En dan nog een instelling voor het zoek van een author met ID 1.
+        when(authorRepository.findById(1L)).thenReturn(Optional.of(author));
     }
 
     @Test
-    void getAllMessages() throws Exception {
+    void getOneMessages() throws Exception {
         // Arrange
         // We zetten wat nep data klaar
         var author = new Author("Test");
@@ -87,5 +105,26 @@ class MessageControllerTest {
                 .andExpect(status().isOk())
                 // En dan of de inhoud voldoet aan onze verwachtingen.
                 .andExpect(content().json("{\"id\":2,\"title\":\"Title\",\"content\":\"Content\",\"authorId\":1}"));
+    }
+
+    @Test
+    public void newMessageTest() throws Exception {
+        // Arrange
+        // De message die we op willen slaan
+        Message result = new Message("Title", "Content", new Author("Test"));
+        result.setId(1L);
+        // Nog steeds Arrange: wat er moet gebeuren als saveMessage wordt aangeroepen.
+        when(messageService.saveMessage(any())).thenReturn(result);
+
+        // Act! Voor het HTTP request uit.
+        mockMvc.perform(
+                MockMvcRequestBuilders.post("/messages")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"authorId\":1,\"content\":\"Content\", \"title\":\"Title\"}")
+        ).andExpect(MockMvcResultMatchers.status().isCreated());
+
+        // Verifiëer dat de messageService.saveMessage methode is aangeroepen. Elk argument telt.
+        // Je kan ook specifiekere matches meegeven!
+        verify(messageService, times(1)).saveMessage(any());
     }
 }

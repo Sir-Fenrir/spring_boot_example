@@ -23,7 +23,7 @@ public class MessageDTO {
     public MessageDTO() {
     }
 
-    public MessageDTO(Long id, String title, String content, long authorId) {
+    public MessageDTO(Long id, String title, String content, Long authorId) {
         this.id = id;
         this.title = title;
         this.content = content;
